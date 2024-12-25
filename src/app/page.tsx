@@ -30,8 +30,8 @@ export default function Home() {
       <header className="bg-blue-500 text-white p-4">
         <h1 className="text-2xl font-extrabold">Keluh Kesah</h1>
       </header>
-      <main>
-        <div>
+      <main className="flex-grow overflow-hidden">
+        <div className="container mx-auto h-full flex flex-col">
           <MessageList messages={messages} />
           <MessageInput 
             onSendMessage={addMessage} 
