@@ -4,10 +4,23 @@ interface MessageProps {
   message: IMessage
 }
 
+function generateColor(name: string) {
+    let hash = 0
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash)
+    }
+    const hue = hash % 360
+    return `hsl(${hue}, 70%, 80%)`
+  }
+
 export default function Message({ message }: MessageProps) {
+
+    const bubbleColor = generateColor(message.userName)
+
     return (
-      <div className="mb-4">
-        <div className="bg-white rounded-lg shadow p-4">
+      <div className="mb-4 relative">
+        <div className="rounded-lg shadow p-4" 
+        style={{ backgroundColor: bubbleColor }}>
           <div className="flex justify-between items-baseline mb-2">
             <span className="font-bold text-blue-600">{message.userName}</span>
             <span className="text-xs text-gray-500">

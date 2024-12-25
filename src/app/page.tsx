@@ -34,7 +34,7 @@ export default function Home() {
         <h1 className="text-2xl font-extrabold">Keluh Kesah</h1>
       </header>
       <main className="flex-grow overflow-hidden">
-        <div className="container mx-auto h-full flex flex-col">
+        <div className="mx-auto h-full flex flex-col">
           <MessageList messages={messages} />
           <MessageInput 
             onSendMessage={addMessage} 
