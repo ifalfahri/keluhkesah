@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MessageList from "./components/MessageList";
 import MessageInput from "./components/MessageInput";
 
@@ -14,6 +14,15 @@ interface Message {
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([])
   const [userName, setUserName] = useState('Anonymous')
+
+  useEffect(() => {
+    // Simulating real-time updates
+    const interval = setInterval(() => {
+      // Check for new messages (placeholder for WebSocket)
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   const addMessage = (text: string) => {
     const newMessage: Message = {
