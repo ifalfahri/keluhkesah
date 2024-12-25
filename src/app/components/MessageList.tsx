@@ -1,15 +1,9 @@
 import { useRef, useEffect } from 'react'
-import Message from './message'
-
-interface Message {
-  id: string;
-  userName: string;
-  timestamp: string;
-  text: string;
-}
+import Message from './Message'
+import { IMessage } from '../types/types'
 
 interface MessageListProps {
-  messages: Message[];
+  messages: IMessage[];
 }
 
 export default function MessageList({ messages }: MessageListProps) {

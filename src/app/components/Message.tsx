@@ -1,9 +1,7 @@
+import { IMessage } from '../types/types'
+
 interface MessageProps {
-  message: {
-    userName: string;
-    timestamp: string;
-    text: string;
-  };
+  message: IMessage
 }
 
 export default function Message({ message }: MessageProps) {

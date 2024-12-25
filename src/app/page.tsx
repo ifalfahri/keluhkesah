@@ -3,16 +3,10 @@
 import { useState, useEffect } from "react";
 import MessageList from "./components/MessageList";
 import MessageInput from "./components/MessageInput";
-
-interface Message {
-  id: string;
-  userName: string;
-  timestamp: string;
-  text: string;
-}
+import { IMessage } from "./types/types";
 
 export default function Home() {
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<IMessage[]>([])
   const [userName, setUserName] = useState('Anonymous')
 
   useEffect(() => {
@@ -25,7 +19,7 @@ export default function Home() {
   }, [])
 
   const addMessage = (text: string) => {
-    const newMessage: Message = {
+    const newMessage: IMessage = {
       id: Date.now().toString(),
       userName,
       text,
