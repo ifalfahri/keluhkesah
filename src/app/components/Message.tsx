@@ -1,8 +1,14 @@
+"use client"
+
 import { IMessage } from '../types/types'
+import { useState } from 'react'
+import { Smile } from 'lucide-react'
 
 interface MessageProps {
   message: IMessage
 }
+
+const reactions = ['👍', '❤️', '😂', '😮', '😢', '😡']
 
 function generateColor(name: string) {
     let hash = 0
@@ -14,6 +20,17 @@ function generateColor(name: string) {
   }
 
 export default function Message({ message }: MessageProps) {
+    const [showReactions, setShowReactions] = useState(false)
+    const [messageReactions, setMessageReactions] = useState<Record<string, number>>({})
+
+    const addReaction = (reaction: string) => {
+        setMessageReactions(prev => ({
+          ...prev,
+          [reaction]: (prev[reaction] || 0) + 1
+        }))
+        setShowReactions(false)
+      }
+    
 
     const bubbleColor = generateColor(message.userName)
 
