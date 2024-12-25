@@ -1,7 +1,7 @@
 interface MessageProps {
   message: {
     userName: string;
-    timestamp: number;
+    timestamp: string;
     text: string;
   };
 }

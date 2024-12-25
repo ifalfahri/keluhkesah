@@ -4,7 +4,7 @@ import Message from './message'
 interface Message {
   id: string;
   userName: string;
-  timestamp: number;
+  timestamp: string;
   text: string;
 }
 

@@ -1,8 +1,29 @@
+"use client"
+
 import { useState } from "react";
 import MessageList from "./components/MessageList";
+import MessageInput from "./components/MessageInput";
+
+interface Message {
+  id: string;
+  userName: string;
+  timestamp: string;
+  text: string;
+}
 
 export default function Home() {
-  const [messages] = useState([])
+  const [messages, setMessages] = useState<Message[]>([])
+  const [userName, setUserName] = useState('Anonymous')
+
+  const addMessage = (text: string) => {
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      userName,
+      text,
+      timestamp: new Date().toISOString(),
+    }
+    setMessages([...messages, newMessage])
+  }
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
@@ -12,6 +33,10 @@ export default function Home() {
       <main>
         <div>
           <MessageList messages={messages} />
+          <MessageInput 
+            onSendMessage={addMessage} 
+            userName={userName} 
+            onChangeUserName={setUserName}  />
         </div>
       </main>
     </div>
