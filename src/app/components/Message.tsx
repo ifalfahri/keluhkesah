@@ -46,6 +46,33 @@ export default function Message({ message }: MessageProps) {
           </div>
           <p className="text-gray-800">{message.text}</p>
         </div>
+        <div className="mt-2 flex flex-wrap gap-1">
+          {Object.entries(messageReactions).map(([reaction, count]) => (
+            <span key={reaction} className="bg-white rounded-full px-2 py-1 text-sm">
+              {reaction} {count}
+            </span>
+          ))}
+        </div>
+        <button 
+        onClick={() => setShowReactions(!showReactions)}
+        className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow"
+        aria-label="Add reaction"
+      ><Smile size={20} />
+      </button>
+      {showReactions && (
+        <div className="absolute bottom-10 right-0 bg-white rounded-lg shadow-lg p-2 flex gap-1">
+          {reactions.map(reaction => (
+            <button
+              key={reaction}
+              onClick={() => addReaction(reaction)}
+              className="text-2xl hover:bg-gray-100 rounded p-1"
+              aria-label={`React with ${reaction}`}
+            >
+              {reaction}
+            </button>
+          ))}
+        </div>
+      )}
       </div>
     )
   }
