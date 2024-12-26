@@ -35,14 +35,14 @@ export default function MessageInput({ onSendMessage, userName, onChangeUserName
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type a message..."
+          placeholder="Ketik pesan..."
           className="flex-grow mr-2 p-2 border rounded"
           aria-label="Message"
         />
         <button
           type="submit"
           className="bg-sky-400 text-white px-4 py-2 rounded hover:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-50"
-          aria-label="Send message"
+          aria-label="Kirim Pesan"
         >
           <SendHorizontal />
         </button>
