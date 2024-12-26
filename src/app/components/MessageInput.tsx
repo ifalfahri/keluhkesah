@@ -41,7 +41,7 @@ export default function MessageInput({ onSendMessage, userName, onChangeUserName
         />
         <button
           type="submit"
-          className="bg-sky-400 text-white px-4 py-2 rounded hover:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+          className="bg-sky-400 text-white px-4 py-2 rounded hover:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-50"
           aria-label="Send message"
         >
           <SendHorizontal />
