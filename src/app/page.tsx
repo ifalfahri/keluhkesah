@@ -32,6 +32,7 @@ export default function Home() {
     <div className="flex flex-col h-screen bg-gray-100">
       <header className="bg-blue-500 text-white p-4 flex flex-row justify-between items-center">
         <h1 className="text-2xl font-extrabold">Keluh Kesah</h1>
+        <a href="https://github.com/ifalfahri" className="px-4 py-2 bg-black rounded">Github</a>
       </header>
       <main className="flex-grow overflow-hidden">
         <div className="mx-auto h-full flex flex-col">
