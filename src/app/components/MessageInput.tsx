@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { SendHorizontal } from 'lucide-react';
 
 interface MessageInputProps {
   onSendMessage: (message: string) => void;
@@ -43,7 +44,7 @@ export default function MessageInput({ onSendMessage, userName, onChangeUserName
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
           aria-label="Send message"
         >
-          Send
+          <SendHorizontal />
         </button>
       </div>
     </form>
