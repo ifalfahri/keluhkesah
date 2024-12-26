@@ -31,7 +31,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
-      <header className="bg-blue-500 text-white p-4 flex flex-row justify-between items-center">
+      <header className="bg-sky-400 text-white p-4 flex flex-row justify-between items-center">
         <h1 className="text-2xl font-extrabold">Keluh Kesah</h1>
         <a href="https://github.com/ifalfahri/keluhkesah" className="group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md bg-neutral-950 px-4 font-medium text-neutral-200 duration-500">
           <div className="relative inline-flex -translate-x-0 items-center transition group-hover:-translate-x-6">
