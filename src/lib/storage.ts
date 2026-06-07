@@ -62,8 +62,14 @@ async function getClientIdentifier() {
   const forwardedFor = requestHeaders.get("x-forwarded-for");
   const realIp = requestHeaders.get("x-real-ip");
   
-  // To prevent spoofing bypasses, prioritize x-real-ip or right-most IP if possible, but Vercel's standard is x-real-ip or x-forwarded-for first.
-  const ip = realIp || forwardedFor?.split(",")[0]?.trim() || "unknown";
+  // To prevent spoofing bypasses, prioritize x-real-ip (set by Vercel).
+  // If fallback to x-forwarded-for is needed, use the right-most IP which is appended by the trusted proxy.
+  let ip = realIp;
+  if (!ip && forwardedFor) {
+    const ips = forwardedFor.split(",");
+    ip = ips[ips.length - 1].trim();
+  }
+  ip = ip || "unknown";
 
   // Removing user-agent because it allows an attacker to bypass rate limits and love limits by randomizing it.
   return createHash("sha256").update(ip).digest("hex");
