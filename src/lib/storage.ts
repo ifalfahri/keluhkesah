@@ -61,10 +61,18 @@ async function getClientIdentifier() {
   const requestHeaders = await headers();
   const forwardedFor = requestHeaders.get("x-forwarded-for");
   const realIp = requestHeaders.get("x-real-ip");
-  const userAgent = requestHeaders.get("user-agent") ?? "unknown";
-  const ip = forwardedFor?.split(",")[0]?.trim() || realIp || "unknown";
+  
+  // To prevent spoofing bypasses, prioritize x-real-ip (set by Vercel).
+  // If fallback to x-forwarded-for is needed, use the right-most IP which is appended by the trusted proxy.
+  let ip = realIp;
+  if (!ip && forwardedFor) {
+    const ips = forwardedFor.split(",");
+    ip = ips[ips.length - 1].trim();
+  }
+  ip = ip || "unknown";
 
-  return createHash("sha256").update(`${ip}:${userAgent}`).digest("hex");
+  // Removing user-agent because it allows an attacker to bypass rate limits and love limits by randomizing it.
+  return createHash("sha256").update(ip).digest("hex");
 }
 
 async function enforceRateLimit(
@@ -152,6 +160,21 @@ async function maybeCleanupRateLimitRows() {
   const cleanupWindowStart = new Date(Math.floor(now / HOUR_IN_MS) * HOUR_IN_MS);
 
   try {
+    const existing = await prisma.rateLimit.findUnique({
+      where: {
+        action_identifier_windowStart: {
+          action: "meta:cleanup",
+          identifier: "global",
+          windowStart: cleanupWindowStart,
+        },
+      },
+      select: { id: true },
+    });
+
+    if (existing) {
+      return;
+    }
+
     await prisma.rateLimit.create({
       data: {
         action: "meta:cleanup",
@@ -183,8 +206,6 @@ async function maybeCleanupRateLimitRows() {
 }
 
 export async function getPosts(skip = 0, take = 12) {
-  await enforceRateLimit("read:posts", 120, 60);
-
   const safeSkip = Math.max(0, Math.min(Math.floor(skip), MAX_SKIP));
   const safeTake = Math.max(1, Math.min(Math.floor(take), MAX_POSTS_PER_PAGE));
 
