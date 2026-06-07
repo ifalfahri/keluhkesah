@@ -23,6 +23,7 @@ model Post {
   timestamp DateTime  @default(now())
   loveCount Int       @default(0)
   comments  Comment[]
+  loves     PostLove[]
 }
 
 model Comment {
@@ -32,4 +33,27 @@ model Comment {
   timestamp DateTime @default(now())
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    String
+}
+
+model RateLimit {
+  id          String   @id @default(cuid())
+  action      String
+  identifier  String
+  windowStart DateTime
+  count       Int      @default(1)
+  createdAt   DateTime @default(now())
+
+  @@unique([action, identifier, windowStart])
+  @@index([createdAt])
+}
+
+model PostLove {
+  id         String   @id @default(cuid())
+  identifier String
+  createdAt  DateTime @default(now())
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId     String
+
+  @@unique([postId, identifier])
+  @@index([identifier])
 }
