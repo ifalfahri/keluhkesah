@@ -33,3 +33,15 @@ model Comment {
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    String
 }
+
+model RateLimit {
+  id          String   @id @default(cuid())
+  action      String
+  identifier  String
+  windowStart DateTime
+  count       Int      @default(1)
+  createdAt   DateTime @default(now())
+
+  @@unique([action, identifier, windowStart])
+  @@index([createdAt])
+}
