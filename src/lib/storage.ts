@@ -1,6 +1,6 @@
 "use server";
 
-import { PrismaClient, Post } from "@prisma/client";
+import { Prisma, PrismaClient, Post } from "@prisma/client";
 import { revalidateTag, unstable_cache } from "next/cache";
 import { headers } from "next/headers";
 import { createHash } from "node:crypto";
@@ -19,6 +19,8 @@ const MAX_FROM_LENGTH = 50;
 const MAX_TO_LENGTH = 80;
 const MAX_POST_MESSAGE_LENGTH = 500;
 const MAX_COMMENT_LENGTH = 280;
+const HOUR_IN_MS = 60 * 60 * 1000;
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 interface NewPost {
   from: string;
@@ -76,6 +78,22 @@ async function enforceRateLimit(
   const windowStart = new Date(Math.floor(now / windowMs) * windowMs);
 
   await prisma.$transaction(async (tx) => {
+    const incremented = await tx.rateLimit.updateMany({
+      where: {
+        action,
+        identifier,
+        windowStart,
+        count: { lt: limit },
+      },
+      data: {
+        count: { increment: 1 },
+      },
+    });
+
+    if (incremented.count > 0) {
+      return;
+    }
+
     const existing = await tx.rateLimit.findUnique({
       where: {
         action_identifier_windowStart: {
@@ -84,9 +102,14 @@ async function enforceRateLimit(
           windowStart,
         },
       },
+      select: { id: true },
     });
 
-    if (!existing) {
+    if (existing) {
+      throw new Error("Terlalu banyak permintaan, coba lagi nanti.");
+    }
+
+    try {
       await tx.rateLimit.create({
         data: {
           action,
@@ -96,16 +119,66 @@ async function enforceRateLimit(
         },
       });
       return;
-    }
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        const retriedIncrement = await tx.rateLimit.updateMany({
+          where: {
+            action,
+            identifier,
+            windowStart,
+            count: { lt: limit },
+          },
+          data: {
+            count: { increment: 1 },
+          },
+        });
 
-    if (existing.count >= limit) {
-      throw new Error("Terlalu banyak permintaan, coba lagi nanti.");
-    }
+        if (retriedIncrement.count > 0) {
+          return;
+        }
+      }
 
-    await tx.rateLimit.update({
-      where: { id: existing.id },
-      data: { count: existing.count + 1 },
+      throw error;
+    }
+  });
+  await maybeCleanupRateLimitRows();
+}
+
+async function maybeCleanupRateLimitRows() {
+  const now = Date.now();
+  const cleanupWindowStart = new Date(Math.floor(now / HOUR_IN_MS) * HOUR_IN_MS);
+
+  try {
+    await prisma.rateLimit.create({
+      data: {
+        action: "meta:cleanup",
+        identifier: "global",
+        windowStart: cleanupWindowStart,
+        count: 1,
+      },
     });
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return;
+    }
+    throw error;
+  }
+
+  await prisma.rateLimit.deleteMany({
+    where: {
+      createdAt: {
+        lt: new Date(now - DAY_IN_MS),
+      },
+      action: {
+        not: "meta:cleanup",
+      },
+    },
   });
 }
 
@@ -211,18 +284,39 @@ export async function addComment(postId: string, comment: NewComment) {
 export async function toggleLove(postId: string) {
   await enforceRateLimit("write:love", 20, 600);
   validateUuid(postId, "Post");
-  await enforceRateLimit(`write:love:${postId}`, 1, 86400);
+  const identifier = await getClientIdentifier();
 
   const post = await prisma.post.findUnique({
     where: { id: postId },
   });
-  if (post) {
-    const updatedPost = await prisma.post.update({
-      where: { id: postId },
-      data: { loveCount: post.loveCount + 1 },
+  if (!post) {
+    return;
+  }
+
+  try {
+    const updatedPost = await prisma.$transaction(async (tx) => {
+      await tx.postLove.create({
+        data: {
+          postId,
+          identifier,
+        },
+      });
+
+      return await tx.post.update({
+        where: { id: postId },
+        data: { loveCount: { increment: 1 } },
+      });
     });
 
     revalidateTag(POSTS_CACHE_TAG);
     return updatedPost;
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      throw new Error("Kamu sudah memberikan love untuk post ini.");
+    }
+    throw error;
   }
 }
