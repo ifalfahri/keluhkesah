@@ -26,9 +26,15 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    const ip = request.headers.get("x-real-ip") ?? 
-               request.headers.get("x-forwarded-for")?.split(",")[0] ?? 
-               "127.0.0.1";
+    let ip = request.headers.get("x-real-ip");
+    if (!ip) {
+      const forwardedFor = request.headers.get("x-forwarded-for");
+      if (forwardedFor) {
+        const ips = forwardedFor.split(",");
+        ip = ips[ips.length - 1].trim();
+      }
+    }
+    ip = ip || "127.0.0.1";
 
     const { success, limit, reset, remaining } = await ratelimit.limit(`ratelimit_${ip}`);
 

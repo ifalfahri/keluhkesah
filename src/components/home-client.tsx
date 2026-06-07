@@ -60,7 +60,8 @@ export function HomeClient({ initialPosts }: HomeClientProps) {
     if (inView && !loading) {
       loadPosts();
     }
-  }, [inView]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inView, loading]);
 
   return (
     <main className="relative min-h-screen bg-gray-50 dark:bg-zinc-900">
